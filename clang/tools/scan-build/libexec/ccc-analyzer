@@ -68,6 +68,7 @@ my $DefaultCCompiler;
 my $DefaultCXXCompiler;
 my $IsCXX;
 my $AnalyzerTarget;
+my $AnalyzerGCCToolchain;
 
 # If on OSX, use xcrun to determine the SDK root.
 my $UseXCRUN = 0;
@@ -105,6 +106,7 @@ else {
 }
 
 $AnalyzerTarget = $ENV{'CLANG_ANALYZER_TARGET'};
+$AnalyzerGCCToolchain = $ENV{'CLANG_ANALYZER_GCC_TOOLCHAIN'};
 
 ##===----------------------------------------------------------------------===##
 # Cleanup.
@@ -244,6 +246,10 @@ sub Analyze {
 
     if (defined $AnalyzerTarget) {
       push @Args, "-target", $AnalyzerTarget;
+    }
+
+    if (defined $AnalyzerGCCToolchain) {
+      push @Args, "-gcc-toolchain", $AnalyzerGCCToolchain;
     }
 
     my $AnalysisArgs = GetCCArgs($HtmlDir, "--analyze", \@Args);

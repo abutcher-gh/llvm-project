@@ -62,6 +62,7 @@ my %Options = (
   UseCC => undef,            # C compiler to use for compilation.
   UseCXX => undef,           # C++ compiler to use for compilation.
   AnalyzerTarget => undef,
+  AnalyzerGCCToolchain => undef,
   StoreModel => undef,
   ConstraintsModel => undef,
   InternalStats => undef,
@@ -1022,6 +1023,7 @@ sub SetEnv {
                    'CCC_CXX',
                    'CCC_REPORT_FAILURES',
                    'CLANG_ANALYZER_TARGET',
+                   'CLANG_ANALYZER_GCC_TOOLCHAIN',
                    'CCC_ANALYZER_FORCE_ANALYZE_DEBUG_CODE') {
     my $x = $EnvVars->{$var};
     if (defined $x) { $ENV{$var} = $x }
@@ -1717,6 +1719,24 @@ sub ProcessArgs {
       next;
     }
 
+    if ($arg =~ /^--analyzer-gcc-toolchain(=(.+))?$/) {
+      shift @ARGV;
+      my $AnalyzerGCCToolchain;
+
+      if (!defined $2 || $2 eq "") {
+        if (!@ARGV) {
+          DieDiag("'--analyzer-gcc-toolchain' option requires a path to a GCC toolchain.\n");
+        }
+        $AnalyzerGCCToolchain = shift @ARGV;
+      }
+      else {
+        $AnalyzerGCCToolchain = $2;
+      }
+
+      $Options{AnalyzerGCCToolchain} = $AnalyzerGCCToolchain;
+      next;
+    }
+
     if ($arg eq "-v") {
       shift @$Args;
       $Options{Verbose}++;
@@ -2000,6 +2020,7 @@ my %EnvVars = (
   'CCC_ANALYZER_INTERNAL_STATS' => $Options{InternalStats},
   'CCC_ANALYZER_OUTPUT_FORMAT' => $Options{OutputFormat},
   'CLANG_ANALYZER_TARGET' => $Options{AnalyzerTarget},
+  'CLANG_ANALYZER_GCC_TOOLCHAIN' => $Options{AnalyzerGCCToolchain},
   'CCC_ANALYZER_FORCE_ANALYZE_DEBUG_CODE' => $Options{ForceAnalyzeDebugCode}
 );
 
